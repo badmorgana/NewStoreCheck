@@ -364,3 +364,77 @@ body {
       grid-template-columns: 1fr;
     }
   }
+
+  /* Add subtle animations */
+.tab-button, .btn, .form-control {
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Make key metrics more visually prominent */
+.key-metric {
+  transition: all 0.3s ease;
+  border-left: 4px solid var(--primary-color);
+}
+
+.key-metric:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+
+/* Improve form styling */
+.form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(106, 61, 152, 0.25);
+}
+
+/* Add section hover effects */
+.form-section {
+  transition: all 0.3s ease;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.form-section:hover {
+  background-color: rgba(106, 61, 152, 0.03);
+}
+
+/* Enhance tab button styling */
+.tab-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.tab-button::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: var(--primary-color);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.tab-button:hover::after {
+  transform: scaleX(0.5);
+}
+
+.tab-button.active::after {
+  transform: scaleX(1);
+}
+
+/* Add card lift effect */
+.form-container, .results-container, .saved-locations-container {
+  transition: all 0.3s ease;
+}
+
+.form-container:hover, .results-container:hover, .saved-locations-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+}
