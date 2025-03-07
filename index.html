@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Store feasibility Calculator</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="CSS/styles.css">
 </head>
 <body>
   <div class="app-container">
@@ -19,9 +19,9 @@
     </header>
     
     <nav class="tab-navigation">
-      <button class="tab-button active">Input Data</button>
-      <button class="tab-button">Results</button>
-      <button class="tab-button">Saved Locations</button>
+      <button class="tab-button active" data-tab="input">Input Data</button>
+      <button class="tab-button" data-tab="results">Results</button>
+      <button class="tab-button" data-tab="saved">Saved Locations</button>
     </nav>
     
     <main class="content-area">
@@ -230,6 +230,6 @@
 </div>
     </main>
   </div>
-  <script src="scripts.js"></script>
+  <script src="js/scripts.js"></script>
 </body>
 </html>
