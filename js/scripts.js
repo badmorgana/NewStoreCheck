@@ -284,8 +284,7 @@ function displayResults(formData, result) {
   // Update breakeven
   document.querySelector('.breakeven-section .metric-value').textContent = `₹${Math.round(result.breakeven.dailySales).toLocaleString()}`;
   
-  // Set up scenario tabs
-  setupScenarioTabs(result);
+
 
   // Add export and print buttons (add this line)
   setupResultsActions();
@@ -317,7 +316,8 @@ function setupScenarioTabs(result) {
       if (scenario) {
         // Update main metric
         document.querySelector('.key-metric .metric-value').textContent = `₹${Math.round(scenario.dailyRevenueNeeded).toLocaleString()} daily sales`;
-        document.querySelector('.key-metric .metric-subtext').textContent = `This requires approximately ${scenario.customersPerDay} customers per day`;
+        document.querySelector('.key-metric .metric-subtext').textContent = `This requires approximately ${scenario.customersPerDay} customers per day (${scenario.visitorsPerDay} visitors)`;
+      
         
         // Update the required monthly revenue and profit
         const metricValues = document.querySelectorAll('.metrics-grid .metric-value');
@@ -331,6 +331,8 @@ function setupScenarioTabs(result) {
     });
   });
 }
+  // Set up scenario tabs
+  setupScenarioTabs(result);
 
 // Load saved calculation into form
 function loadCalculation(index) {
@@ -394,6 +396,12 @@ function deleteCalculation(index) {
 }
 // Add these functions to setup print and export
 function setupResultsActions() {
+
+  const existingActions = document.querySelector('.results-actions');
+  if (existingActions) {
+    existingActions.remove();
+  }
+
   // Create container for action buttons
   const actionsContainer = document.createElement('div');
   actionsContainer.className = 'results-actions';
@@ -559,12 +567,4 @@ function exportToCSV() {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-}
-
-// Update your displayResults function to add these buttons
-function displayResults(formData, result) {
-  // ... (existing code)
-  
-  // Add export and print buttons
-  setupResultsActions();
 }
