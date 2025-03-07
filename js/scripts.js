@@ -262,7 +262,8 @@ function displayResults(formData, result) {
   
   // Update main metric
   document.querySelector('.key-metric .metric-value').textContent = `₹${Math.round(result.twoYearROI.dailyRevenueNeeded).toLocaleString()} daily sales`;
-  document.querySelector('.key-metric .metric-subtext').textContent = `This requires approximately ${result.twoYearROI.customersPerDay} customers per day`;
+  document.querySelector('.key-metric .metric-subtext').textContent = `This requires approximately ${result.twoYearROI.customersPerDay} customers per day (${result.twoYearROI.visitorsPerDay} visitors)`;
+
   
   // Update metrics grid
   const metricsGrid = document.querySelector('.metrics-grid');
