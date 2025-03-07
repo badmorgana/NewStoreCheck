@@ -220,21 +220,24 @@ function calculateROI(data) {
   
   // Calculate various ROI scenarios
   const sixMonthROI = {
-    monthlyRevenueNeeded: (initialInvestment / 6) + totalMonthlyExpenses,
-    dailyRevenueNeeded: ((initialInvestment / 6) + totalMonthlyExpenses) / 30,
-    customersPerDay: Math.ceil(((initialInvestment / 6) + totalMonthlyExpenses) / 30 / data.avgTransaction)
+      monthlyRevenueNeeded: (initialInvestment / 6) + totalMonthlyExpenses,
+      dailyRevenueNeeded: ((initialInvestment / 6) + totalMonthlyExpenses) / 30,
+      customersPerDay: Math.ceil(((initialInvestment / 6) + totalMonthlyExpenses) / 30 / data.avgTransaction),
+      visitorsPerDay: Math.ceil(((initialInvestment / 6) + totalMonthlyExpenses) / 30 / data.avgTransaction / (data.conversionRate / 100))
+    
   };
   
   const twoYearROI = {
     monthlyRevenueNeeded: (initialInvestment / 24) + totalMonthlyExpenses,
-    dailyRevenueNeeded: ((initialInvestment / 24) + totalMonthlyExpenses) / 30,
-    customersPerDay: Math.ceil(((initialInvestment / 24) + totalMonthlyExpenses) / 30 / data.avgTransaction)
-  };
+      dailyRevenueNeeded: ((initialInvestment / 24) + totalMonthlyExpenses) / 30,
+      customersPerDay: Math.ceil(((initialInvestment / 24) + totalMonthlyExpenses) / 30 / data.avgTransaction),
+      visitorsPerDay: Math.ceil(((initialInvestment / 24) + totalMonthlyExpenses) / 30 / data.avgTransaction / (data.conversionRate / 100))};
   
   const threeYearROI = {
     monthlyRevenueNeeded: (initialInvestment / 36) + totalMonthlyExpenses,
-    dailyRevenueNeeded: ((initialInvestment / 36) + totalMonthlyExpenses) / 30,
-    customersPerDay: Math.ceil(((initialInvestment / 36) + totalMonthlyExpenses) / 30 / data.avgTransaction)
+      dailyRevenueNeeded: ((initialInvestment / 36) + totalMonthlyExpenses) / 30,
+      customersPerDay: Math.ceil(((initialInvestment / 36) + totalMonthlyExpenses) / 30 / data.avgTransaction),
+      visitorsPerDay: Math.ceil(((initialInvestment / 36) + totalMonthlyExpenses) / 30 / data.avgTransaction / (data.conversionRate / 100))
   };
   
   // Calculate breakeven daily sales
