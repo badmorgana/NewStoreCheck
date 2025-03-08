@@ -5,22 +5,25 @@ function saveCalculation(data) {
   data.timestamp = new Date().toISOString();
   
   // Check if user is signed in
-  const user = auth.currentUser;
-  if (user) {
-    // Save to Firestore
-    db.collection('users').doc(user.uid).collection('calculations').add(data)
-      .then(docRef => {
-        console.log('Calculation saved to Firestore with ID:', docRef.id);
-      })
-      .catch(error => {
-        console.error('Error saving to Firestore:', error);
-        // Fallback to localStorage
-        saveToLocalStorage(data);
-      });
-  } else {
-    // Save to localStorage
-    saveToLocalStorage(data);
+  if (typeof firebase !== 'undefined' && firebase.auth) {
+    const user = firebase.auth().currentUser;
+    if (user) {
+      // Save to Firestore
+      firebase.firestore().collection('users').doc(user.uid).collection('calculations').add(data)
+        .then(docRef => {
+          console.log('Calculation saved to Firestore with ID:', docRef.id);
+        })
+        .catch(error => {
+          console.error('Error saving to Firestore:', error);
+          // Fallback to localStorage
+          saveToLocalStorage(data);
+        });
+      return;
+    }
   }
+  
+  // Save to localStorage if not signed in or Firebase not available
+  saveToLocalStorage(data);
 }
 
 // Helper function for localStorage saving
@@ -37,7 +40,12 @@ function saveToLocalStorage(data) {
 
 // Functions to load from Firestore
 function loadCalculationsFromFirestore() {
-  const user = auth.currentUser;
+  if (typeof firebase === 'undefined' || !firebase.auth) {
+    console.warn('Firebase is not available. Cannot load from Firestore.');
+    return;
+  }
+  
+  const user = firebase.auth().currentUser;
   if (!user) return;
   
   const savedLocationsContainer = document.getElementById('saved-locations-container');
@@ -46,7 +54,7 @@ function loadCalculationsFromFirestore() {
   // Show loading indicator
   savedLocationsContainer.innerHTML = '<p>Loading your saved calculations...</p>';
   
-  db.collection('users').doc(user.uid).collection('calculations')
+  firebase.firestore().collection('users').doc(user.uid).collection('calculations')
     .orderBy('timestamp', 'desc')
     .get()
     .then(snapshot => {
@@ -91,20 +99,52 @@ function loadCalculationsFromFirestore() {
 
 // Add functions for loading and deleting specific calculations
 function loadCalculationFromFirestore(docId) {
-  const user = auth.currentUser;
+  if (typeof firebase === 'undefined' || !firebase.auth) {
+    console.warn('Firebase is not available. Cannot load from Firestore.');
+    return;
+  }
+  
+  const user = firebase.auth().currentUser;
   if (!user) return;
   
-  db.collection('users').doc(user.uid).collection('calculations').doc(docId)
+  firebase.firestore().collection('users').doc(user.uid).collection('calculations').doc(docId)
     .get()
     .then(doc => {
       if (doc.exists) {
         const calc = doc.data();
         
-        // Fill the form with saved data (same as your existing loadCalculation function)
+        // Fill the form with saved data
         const data = calc.formData;
         
-        // Fill all form fields as in your original code
-        // ... (copy your existing form field population code here)
+        // Location info
+        document.querySelector('input[placeholder="e.g., Jayanagar, Bangalore"]').value = data.locationName || '';
+        document.querySelector('input[placeholder="e.g., 1000"]').value = data.storeSize || '';
+        document.querySelector('input[placeholder="e.g., 5000"]').value = data.squareFootCost || '';
+        document.querySelector('input[placeholder="e.g., 100"]').value = data.monthlyRent || '';
+        
+        // Initial investment
+        document.querySelector('input[placeholder="e.g., 1000000"]').value = data.interiorCost || '';
+        document.querySelector('input[placeholder="e.g., 300000"]').value = data.securityDeposit || '';
+        document.querySelector('input[placeholder="e.g., 500000"]').value = data.fixturesEquipment || '';
+        document.querySelector('input[placeholder="e.g., 5000000"]').value = data.initialStock || '';
+        document.querySelector('input[placeholder="e.g., 200000"]').value = data.otherOneTime || '';
+        
+        // Monthly operational
+        document.querySelector('input[placeholder="e.g., 3"]').value = data.numEmployees || '';
+        document.querySelector('input[placeholder="e.g., 25000"]').value = data.avgSalary || '';
+        document.querySelector('input[placeholder="e.g., 15000"]').value = data.utilities || '';
+        document.querySelector('input[placeholder="e.g., 10000"]').value = data.maintenance || '';
+        document.querySelector('input[placeholder="e.g., 30000"]').value = data.marketing || '';
+        document.querySelector('input[placeholder="e.g., 20000"]').value = data.otherMonthly || '';
+        
+        // Financing
+        document.querySelector('input[placeholder="e.g., 3000000"]').value = data.loanAmount || '';
+        document.querySelector('input[placeholder="e.g., 12"]').value = data.interestRate || '';
+        
+        // Sales metrics
+        document.querySelector('input[placeholder="e.g., 4000"]').value = data.avgTransaction || '';
+        document.querySelector('input[placeholder="e.g., 90"]').value = data.conversionRate || '';
+        document.querySelector('input[placeholder="e.g., 50"]').value = data.profitMargin || '';
         
         // Switch to input tab
         switchToTab('input');
@@ -120,11 +160,16 @@ function loadCalculationFromFirestore(docId) {
 }
 
 function deleteCalculationFromFirestore(docId) {
-  const user = auth.currentUser;
+  if (typeof firebase === 'undefined' || !firebase.auth) {
+    console.warn('Firebase is not available. Cannot delete from Firestore.');
+    return;
+  }
+  
+  const user = firebase.auth().currentUser;
   if (!user) return;
   
   if (confirm('Are you sure you want to delete this saved calculation?')) {
-    db.collection('users').doc(user.uid).collection('calculations').doc(docId)
+    firebase.firestore().collection('users').doc(user.uid).collection('calculations').doc(docId)
       .delete()
       .then(() => {
         loadCalculationsFromFirestore();
@@ -178,13 +223,105 @@ function displaySavedCalculations() {
   savedLocationsContainer.innerHTML = html;
 }
 
+// Function to setup authentication
+function setupAuth() {
+  // Check if Firebase auth is available
+  if (typeof firebase !== 'undefined' && firebase.auth) {
+    const auth = firebase.auth();
+    const authStatus = document.getElementById('auth-status');
+    
+    // Set up auth state change listener
+    auth.onAuthStateChanged(user => {
+      if (authStatus) {
+        if (user) {
+          // User is signed in
+          authStatus.innerHTML = `
+            <span>Signed in as ${user.email}</span>
+            <button id="sign-out-btn" class="btn-small">Sign Out</button>
+          `;
+          
+          // Add sign out functionality
+          document.getElementById('sign-out-btn').addEventListener('click', () => {
+            auth.signOut();
+          });
+          
+          // Load user's calculations from Firestore
+          if (document.getElementById('saved-locations-container')) {
+            loadCalculationsFromFirestore();
+          }
+        } else {
+          // User is signed out
+          authStatus.innerHTML = `
+            <button id="sign-in-btn" class="btn-small">Sign In</button>
+          `;
+          
+          // Add sign in functionality
+          document.getElementById('sign-in-btn').addEventListener('click', () => {
+            const modal = document.getElementById('auth-modal');
+            if (modal) modal.style.display = 'block';
+          });
+        }
+      }
+    });
+    
+    // Setup auth modal close button
+    const modal = document.getElementById('auth-modal');
+    const closeBtn = document.querySelector('.auth-close');
+    if (modal && closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+    }
+    
+    // Setup sign in buttons
+    const emailSignInBtn = document.getElementById('email-signin-btn');
+    if (emailSignInBtn) {
+      emailSignInBtn.addEventListener('click', () => {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        
+        auth.signInWithEmailAndPassword(email, password)
+          .then(() => {
+            if (modal) modal.style.display = 'none';
+          })
+          .catch(error => {
+            alert(`Sign in error: ${error.message}`);
+          });
+      });
+    }
+    
+    // Google sign in
+    const googleSignInBtn = document.getElementById('google-signin-btn');
+    if (googleSignInBtn) {
+      googleSignInBtn.addEventListener('click', () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider)
+          .then(() => {
+            if (modal) modal.style.display = 'none';
+          })
+          .catch(error => {
+            alert(`Google sign in error: ${error.message}`);
+          });
+      });
+    }
+  } else {
+    console.warn('Firebase Auth is not available. Authentication features will be disabled.');
+  }
+}
+
 // DOM Ready - Initialize everything
 document.addEventListener('DOMContentLoaded', function() {
   // Setup event listeners
   setupForm();
   setupTabs();
   setupLoadSavedButton();
-  setupAuth();
+  
+  // Only call setupAuth if Firebase is available
+  if (typeof firebase !== 'undefined' && firebase.auth) {
+    setupAuth();
+  } else {
+    console.warn('Firebase Auth is not available. Authentication features will be disabled.');
+  }
 });
 
 // Form setup and calculation logic
@@ -304,11 +441,12 @@ function switchToTab(tabName) {
     savedLocationsContainer.style.display = tabName === 'saved' ? 'block' : 'none';
     
     if (tabName === 'saved') {
-      // Check if user is signed in
-      if (auth.currentUser) {
+      // Check if Firebase is available and user is signed in
+      if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
         loadCalculationsFromFirestore();
       } else {
-        displaySavedCalculations(); // Fallback to localStorage
+        // Fallback to localStorage
+        displaySavedCalculations();
       }
     }
   }
