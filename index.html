@@ -11,9 +11,20 @@
     <header class="app-header">
       <div class="app-title">
         <div class="app-logo">R</div>
-        <h1>Store ROI Calculator</h1>
+        <h1>New Store Check</h1>
       </div>
-      <div>
+      <div class="header-actions">
+        <!-- Authentication UI -->
+        <div class="user-auth">
+          <div id="auth-status">
+            <button id="login-btn" class="btn btn-secondary">Sign In</button>
+          </div>
+          <div id="user-info" style="display: none;">
+            <span id="user-email"></span>
+            <button id="logout-btn" class="btn btn-secondary">Sign Out</button>
+          </div>
+        </div>
+        <!-- Load Saved button -->
         <button class="btn btn-secondary">Load Saved</button>
       </div>
     </header>
@@ -230,6 +241,35 @@
 </div>
     </main>
   </div>
-  <script src="js/scripts.js"></script>
+  <!-- Authentication Modal -->
+<div id="auth-modal" class="auth-modal" style="display: none;">
+  <div class="auth-modal-content">
+    <span class="auth-close">&times;</span>
+    <h2>Sign In</h2>
+    <div id="auth-form">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" class="form-control">
+      </div>
+      <div class="auth-buttons">
+        <button id="signin-btn" class="btn btn-primary">Sign In</button>
+        <button id="signup-btn" class="btn btn-secondary">Create Account</button>
+      </div>
+      <div class="auth-provider-buttons">
+        <button id="google-signin-btn" class="btn">Sign in with Google</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="js/scripts.js"></script>
 </body>
 </html>
