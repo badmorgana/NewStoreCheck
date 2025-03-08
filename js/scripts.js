@@ -1,18 +1,139 @@
-// Add this to your scripts.js file
-
-// Save calculation data
+// Save calculation data to firebase
 function saveCalculation(data) {
-  // Get existing saved calculations or initialize empty array
-  let savedCalculations = JSON.parse(localStorage.getItem('roiCalculations')) || [];
   
   // Add timestamp
   data.timestamp = new Date().toISOString();
+  
+  // Check if user is signed in
+  const user = auth.currentUser;
+  if (user) {
+    // Save to Firestore
+    db.collection('users').doc(user.uid).collection('calculations').add(data)
+      .then(docRef => {
+        console.log('Calculation saved to Firestore with ID:', docRef.id);
+      })
+      .catch(error => {
+        console.error('Error saving to Firestore:', error);
+        // Fallback to localStorage
+        saveToLocalStorage(data);
+      });
+  } else {
+    // Save to localStorage
+    saveToLocalStorage(data);
+  }
+}
+
+// Helper function for localStorage saving
+function saveToLocalStorage(data) {
+  // Get existing saved calculations or initialize empty array
+  let savedCalculations = JSON.parse(localStorage.getItem('roiCalculations')) || [];
   
   // Add to array
   savedCalculations.push(data);
   
   // Save back to localStorage
   localStorage.setItem('roiCalculations', JSON.stringify(savedCalculations));
+}
+
+// Functions to load from Firestore
+function loadCalculationsFromFirestore() {
+  const user = auth.currentUser;
+  if (!user) return;
+  
+  const savedLocationsContainer = document.getElementById('saved-locations-container');
+  if (!savedLocationsContainer) return;
+  
+  // Show loading indicator
+  savedLocationsContainer.innerHTML = '<p>Loading your saved calculations...</p>';
+  
+  db.collection('users').doc(user.uid).collection('calculations')
+    .orderBy('timestamp', 'desc')
+    .get()
+    .then(snapshot => {
+      if (snapshot.empty) {
+        savedLocationsContainer.innerHTML = '<p>No saved calculations yet.</p>';
+        return;
+      }
+      
+      let html = '<div class="saved-calculations-list">';
+      
+      snapshot.forEach((doc, index) => {
+        const calc = doc.data();
+        const date = new Date(calc.timestamp).toLocaleDateString();
+        
+        html += `
+          <div class="saved-calculation-item">
+            <div class="saved-item-header">
+              <h3>${calc.locationName || 'Unnamed Location'}</h3>
+              <span>${date}</span>
+            </div>
+            <div class="saved-item-metrics">
+              <div>Initial Investment: ₹${calc.initialInvestment.toLocaleString()}</div>
+              <div>Monthly Revenue: ₹${calc.monthlyRevenue.toLocaleString()}</div>
+              <div>ROI Period: ${calc.roiPeriod} years</div>
+            </div>
+            <div class="saved-item-actions">
+              <button onclick="loadCalculationFromFirestore('${doc.id}')">Load</button>
+              <button onclick="deleteCalculationFromFirestore('${doc.id}')">Delete</button>
+            </div>
+          </div>
+        `;
+      });
+      
+      html += '</div>';
+      savedLocationsContainer.innerHTML = html;
+    })
+    .catch(error => {
+      console.error('Error loading calculations from Firestore:', error);
+      savedLocationsContainer.innerHTML = '<p>Error loading calculations. Please try again.</p>';
+    });
+}
+
+// Add functions for loading and deleting specific calculations
+function loadCalculationFromFirestore(docId) {
+  const user = auth.currentUser;
+  if (!user) return;
+  
+  db.collection('users').doc(user.uid).collection('calculations').doc(docId)
+    .get()
+    .then(doc => {
+      if (doc.exists) {
+        const calc = doc.data();
+        
+        // Fill the form with saved data (same as your existing loadCalculation function)
+        const data = calc.formData;
+        
+        // Fill all form fields as in your original code
+        // ... (copy your existing form field population code here)
+        
+        // Switch to input tab
+        switchToTab('input');
+        
+        // Display results
+        displayResults(data, calc.result);
+      }
+    })
+    .catch(error => {
+      console.error('Error loading calculation:', error);
+      alert('Error loading calculation. Please try again.');
+    });
+}
+
+function deleteCalculationFromFirestore(docId) {
+  const user = auth.currentUser;
+  if (!user) return;
+  
+  if (confirm('Are you sure you want to delete this saved calculation?')) {
+    db.collection('users').doc(user.uid).collection('calculations').doc(docId)
+      .delete()
+      .then(() => {
+        loadCalculationsFromFirestore();
+      })
+      .catch(error => {
+        console.error('Error deleting calculation:', error);
+        alert('Error deleting calculation. Please try again.');
+      });
+  }
 }
 
 // Load saved calculations
@@ -56,12 +177,14 @@ function displaySavedCalculations() {
   html += '</div>';
   savedLocationsContainer.innerHTML = html;
 }
+
 // DOM Ready - Initialize everything
 document.addEventListener('DOMContentLoaded', function() {
   // Setup event listeners
   setupForm();
   setupTabs();
   setupLoadSavedButton();
+  setupAuth();
 });
 
 // Form setup and calculation logic
@@ -181,7 +304,12 @@ function switchToTab(tabName) {
     savedLocationsContainer.style.display = tabName === 'saved' ? 'block' : 'none';
     
     if (tabName === 'saved') {
-      displaySavedCalculations();
+      // Check if user is signed in
+      if (auth.currentUser) {
+        loadCalculationsFromFirestore();
+      } else {
+        displaySavedCalculations(); // Fallback to localStorage
+      }
     }
   }
 }
