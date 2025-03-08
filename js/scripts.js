@@ -161,18 +161,18 @@ function loadCalculationFromFirestore(docId) {
         
         // Monthly operational
         setDropdownValue('num-employees', 'custom-employees', data.numEmployees);
-        document.querySelector('input[placeholder="e.g., 25000"]').value = data.avgSalary || '';
-        document.querySelector('input[placeholder="e.g., 15000"]').value = data.utilities || '';
-        document.querySelector('input[placeholder="e.g., 10000"]').value = data.maintenance || '';
+        setDropdownValue('avg-salary', 'custom-avg-salary', data.avgSalary);
+        setDropdownValue('utilities', 'custom-utilities', data.utilities);
+        setDropdownValue('maintenance', 'custom-maintenance', data.maintenance);
         document.querySelector('input[placeholder="e.g., 30000"]').value = data.marketing || '';
         document.querySelector('input[placeholder="e.g., 20000"]').value = data.otherMonthly || '';
         
         // Financing
-        document.querySelector('input[placeholder="e.g., 3000000"]').value = data.loanAmount || '';
+        setDropdownValue('loan-amount', 'custom-loan-amount', data.loanAmount);
         setDropdownValue('interest-rate', 'custom-interest-rate', data.interestRate);
         
         // Sales metrics
-        document.querySelector('input[placeholder="e.g., 4000"]').value = data.avgTransaction || '';
+        setDropdownValue('avg-transaction', 'custom-avg-transaction', data.avgTransaction);
         setDropdownValue('conversion-rate', 'custom-conversion-rate', data.conversionRate);
         setDropdownValue('profit-margin', 'custom-profit-margin', data.profitMargin);
         
@@ -181,6 +181,11 @@ function loadCalculationFromFirestore(docId) {
         
         // Display results
         displayResults(data, calc.result);
+        
+        // Update calculated values
+        const updateEvent = new Event('change');
+        document.getElementById('store-size').dispatchEvent(updateEvent);
+        document.getElementById('monthly-rent').dispatchEvent(updateEvent);
       }
     })
     .catch(error => {
@@ -395,6 +400,7 @@ document.addEventListener('DOMContentLoaded', function() {
   setupTabs();
   setupLoadSavedButton();
   setupDropdowns();
+  setupCustomInputs();
   
   // Only call setupAuth if Firebase is available
   if (typeof firebase !== 'undefined' && firebase.auth) {
@@ -413,6 +419,11 @@ function setupDropdowns() {
     { select: 'interior-cost', custom: 'custom-interior-cost' },
     { select: 'initial-stock', custom: 'custom-initial-stock' },
     { select: 'num-employees', custom: 'custom-employees' },
+    { select: 'avg-salary', custom: 'custom-avg-salary' },
+    { select: 'utilities', custom: 'custom-utilities' },
+    { select: 'maintenance', custom: 'custom-maintenance' },
+    { select: 'loan-amount', custom: 'custom-loan-amount' },
+    { select: 'avg-transaction', custom: 'custom-avg-transaction' },
     { select: 'conversion-rate', custom: 'custom-conversion-rate' },
     { select: 'profit-margin', custom: 'custom-profit-margin' },
     { select: 'interest-rate', custom: 'custom-interest-rate' }
@@ -428,13 +439,95 @@ function setupDropdowns() {
         if (this.value === 'custom') {
           customInput.style.display = 'block';
           customInput.required = true;
+          
+          // For custom inputs, add change event to update calculated values
+          if (dropdown.select === 'store-size' || dropdown.select === 'monthly-rent') {
+            customInput.addEventListener('input', updateCalculatedRent);
+          }
         } else {
           customInput.style.display = 'none';
           customInput.required = false;
         }
+        
+        // Update calculated values when dropdown changes
+        if (dropdown.select === 'store-size' || dropdown.select === 'monthly-rent') {
+          updateCalculatedRent();
+        }
       });
     }
   });
+  
+  // Function to update the calculated rent
+  function updateCalculatedRent() {
+    const sizeSelect = document.getElementById('store-size');
+    const customSizeInput = document.getElementById('custom-store-size');
+    const rentSelect = document.getElementById('monthly-rent');
+    const customRentInput = document.getElementById('custom-monthly-rent');
+    const calculatedRentSpan = document.getElementById('calculated-rent');
+    const selectedSizeSpan = document.getElementById('selected-size');
+    
+    // Get store size
+    let storeSize = 0;
+    if (sizeSelect.value === 'custom') {
+      storeSize = parseFloat(customSizeInput.value) || 0;
+    } else {
+      storeSize = parseFloat(sizeSelect.value) || 0;
+    }
+    
+    // Get rent per sq ft
+    let rentPerSqFt = 0;
+    if (rentSelect.value === 'custom') {
+      rentPerSqFt = parseFloat(customRentInput.value) || 0;
+    } else {
+      rentPerSqFt = parseFloat(rentSelect.value) || 0;
+    }
+    
+    // Calculate total monthly rent
+    const totalMonthlyRent = storeSize * rentPerSqFt;
+    
+    // Update the calculated rent span
+    if (storeSize > 0 && rentPerSqFt > 0) {
+      calculatedRentSpan.textContent = `Total Monthly Rent: ₹${totalMonthlyRent.toLocaleString()}`;
+    } else {
+      calculatedRentSpan.textContent = '';
+    }
+    
+    // Update the selected size span
+    if (storeSize > 0) {
+      selectedSizeSpan.textContent = `Selected Size: ${storeSize.toLocaleString()} sq ft`;
+    } else {
+      selectedSizeSpan.textContent = '';
+    }
+  }
+  
+  // Initialize calculated values
+  updateCalculatedRent();
+  
+  // Listen for custom event to update calculated rent
+  document.addEventListener('calculate-rent', updateCalculatedRent);
+}
+
+// Setup custom input fields
+function setupCustomInputs() {
+  // Add event listeners to custom inputs for store size and monthly rent
+  const customSizeInput = document.getElementById('custom-store-size');
+  const customRentInput = document.getElementById('custom-monthly-rent');
+  
+  if (customSizeInput) {
+    customSizeInput.addEventListener('input', function() {
+      // Trigger the updateCalculatedRent function in setupDropdowns
+      const event = new CustomEvent('calculate-rent');
+      document.dispatchEvent(event);
+    });
+  }
+  
+  if (customRentInput) {
+    customRentInput.addEventListener('input', function() {
+      // Trigger the updateCalculatedRent function in setupDropdowns
+      const event = new CustomEvent('calculate-rent');
+      document.dispatchEvent(event);
+    });
+  }
 }
 
 // Form setup and calculation logic
@@ -472,18 +565,18 @@ function setupForm() {
         
         // Monthly Operational
         numEmployees: getDropdownValue('num-employees', 'custom-employees'),
-        avgSalary: parseFloat(document.querySelector('input[placeholder="e.g., 25000"]').value) || 0,
-        utilities: parseFloat(document.querySelector('input[placeholder="e.g., 15000"]').value) || 0,
-        maintenance: parseFloat(document.querySelector('input[placeholder="e.g., 10000"]').value) || 0,
+        avgSalary: getDropdownValue('avg-salary', 'custom-avg-salary'),
+        utilities: getDropdownValue('utilities', 'custom-utilities'),
+        maintenance: getDropdownValue('maintenance', 'custom-maintenance'),
         marketing: parseFloat(document.querySelector('input[placeholder="e.g., 30000"]').value) || 0,
         otherMonthly: parseFloat(document.querySelector('input[placeholder="e.g., 20000"]').value) || 0,
         
         // Financing
-        loanAmount: parseFloat(document.querySelector('input[placeholder="e.g., 3000000"]').value) || 0,
+        loanAmount: getDropdownValue('loan-amount', 'custom-loan-amount'),
         interestRate: getDropdownValue('interest-rate', 'custom-interest-rate'),
         
         // Sales Metrics
-        avgTransaction: parseFloat(document.querySelector('input[placeholder="e.g., 4000"]').value) || 0,
+        avgTransaction: getDropdownValue('avg-transaction', 'custom-avg-transaction'),
         conversionRate: getDropdownValue('conversion-rate', 'custom-conversion-rate'),
         profitMargin: getDropdownValue('profit-margin', 'custom-profit-margin'),
       };
@@ -776,24 +869,29 @@ function loadCalculation(index) {
     
     // Monthly operational
     setDropdownValue('num-employees', 'custom-employees', data.numEmployees);
-    document.querySelector('input[placeholder="e.g., 25000"]').value = data.avgSalary || '';
-    document.querySelector('input[placeholder="e.g., 15000"]').value = data.utilities || '';
-    document.querySelector('input[placeholder="e.g., 10000"]').value = data.maintenance || '';
+    setDropdownValue('avg-salary', 'custom-avg-salary', data.avgSalary);
+    setDropdownValue('utilities', 'custom-utilities', data.utilities);
+    setDropdownValue('maintenance', 'custom-maintenance', data.maintenance);
     document.querySelector('input[placeholder="e.g., 30000"]').value = data.marketing || '';
     document.querySelector('input[placeholder="e.g., 20000"]').value = data.otherMonthly || '';
     
     // Financing
-    document.querySelector('input[placeholder="e.g., 3000000"]').value = data.loanAmount || '';
+    setDropdownValue('loan-amount', 'custom-loan-amount', data.loanAmount);
     setDropdownValue('interest-rate', 'custom-interest-rate', data.interestRate);
     
     // Sales metrics
-    document.querySelector('input[placeholder="e.g., 4000"]').value = data.avgTransaction || '';
+    setDropdownValue('avg-transaction', 'custom-avg-transaction', data.avgTransaction);
     setDropdownValue('conversion-rate', 'custom-conversion-rate', data.conversionRate);
     setDropdownValue('profit-margin', 'custom-profit-margin', data.profitMargin);
     
     // Switch to input tab
     switchToTab('input');
     displayResults(data, calc.result);
+    
+    // Update calculated values
+    const updateEvent = new Event('change');
+    document.getElementById('store-size').dispatchEvent(updateEvent);
+    document.getElementById('monthly-rent').dispatchEvent(updateEvent);
   }
 }
 

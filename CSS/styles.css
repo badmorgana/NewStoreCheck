@@ -552,3 +552,17 @@ select.form-control option {
 select.form-control:hover {
   border-color: var(--primary-color);
 }
+
+/* Calculated value display */
+.calculated-value {
+  display: block;
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--primary-color);
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.calculated-value:empty {
+  display: none;
+}

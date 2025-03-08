@@ -58,6 +58,7 @@
                   <option value="custom">Custom size</option>
                 </select>
                 <input type="number" class="form-control custom-input" id="custom-store-size" placeholder="Enter custom size" style="display: none; margin-top: 10px;">
+                <span id="selected-size" class="calculated-value"></span>
               </div>
             </div>
             
@@ -75,6 +76,7 @@
                   <option value="custom">Custom rate</option>
                 </select>
                 <input type="number" class="form-control custom-input" id="custom-monthly-rent" placeholder="Enter custom rate" style="display: none; margin-top: 10px;">
+                <span id="calculated-rent" class="calculated-value"></span>
               </div>
             </div>
           </div>
@@ -149,18 +151,47 @@
               </div>
               <div class="form-group">
                 <label class="form-label">Average Salary per Employee (₹)</label>
-                <input type="number" class="form-control" placeholder="e.g., 25000">
+                <select class="form-control" id="avg-salary">
+                  <option value="">Select salary</option>
+                  <option value="11000">₹11,000 (Entry Level)</option>
+                  <option value="15000">₹15,000 (Junior)</option>
+                  <option value="18000">₹18,000 (Mid-Level)</option>
+                  <option value="20000">₹20,000 (Experienced)</option>
+                  <option value="25000">₹25,000 (Senior)</option>
+                  <option value="custom">Custom amount</option>
+                </select>
+                <input type="number" class="form-control custom-input" id="custom-avg-salary" placeholder="Enter custom amount" style="display: none; margin-top: 10px;">
               </div>
             </div>
             
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">Utilities (Electricity, Water, etc.) (₹)</label>
-                <input type="number" class="form-control" placeholder="e.g., 15000">
+                <select class="form-control" id="utilities">
+                  <option value="">Select amount</option>
+                  <option value="50000">₹50,000 (Small Store)</option>
+                  <option value="75000">₹75,000 (Medium Store)</option>
+                  <option value="100000">₹1 Lakh (Standard)</option>
+                  <option value="150000">₹1.5 Lakhs (Large Store)</option>
+                  <option value="200000">₹2 Lakhs (Premium Location)</option>
+                  <option value="300000">₹3 Lakhs (Luxury Location)</option>
+                  <option value="custom">Custom amount</option>
+                </select>
+                <input type="number" class="form-control custom-input" id="custom-utilities" placeholder="Enter custom amount" style="display: none; margin-top: 10px;">
               </div>
               <div class="form-group">
                 <label class="form-label">Maintenance (₹)</label>
-                <input type="number" class="form-control" placeholder="e.g., 10000">
+                <select class="form-control" id="maintenance">
+                  <option value="">Select amount</option>
+                  <option value="30000">₹30,000 (Basic)</option>
+                  <option value="50000">₹50,000 (Standard)</option>
+                  <option value="75000">₹75,000 (Comprehensive)</option>
+                  <option value="100000">₹1 Lakh (Premium)</option>
+                  <option value="150000">₹1.5 Lakhs (High-end)</option>
+                  <option value="200000">₹2 Lakhs (Luxury)</option>
+                  <option value="custom">Custom amount</option>
+                </select>
+                <input type="number" class="form-control custom-input" id="custom-maintenance" placeholder="Enter custom amount" style="display: none; margin-top: 10px;">
               </div>
             </div>
             
@@ -181,7 +212,17 @@
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">Loan Amount (₹)</label>
-                <input type="number" class="form-control" placeholder="e.g., 3000000">
+                <select class="form-control" id="loan-amount">
+                  <option value="">Select amount</option>
+                  <option value="10000000">₹1 Crore (Minimal)</option>
+                  <option value="15000000">₹1.5 Crore (Small)</option>
+                  <option value="20000000">₹2 Crore (Medium)</option>
+                  <option value="30000000">₹3 Crore (Large)</option>
+                  <option value="40000000">₹4 Crore (Extensive)</option>
+                  <option value="50000000">₹5 Crore (Maximum)</option>
+                  <option value="custom">Custom amount</option>
+                </select>
+                <input type="number" class="form-control custom-input" id="custom-loan-amount" placeholder="Enter custom amount" style="display: none; margin-top: 10px;">
               </div>
               <div class="form-group">
                 <label class="form-label">Annual Interest Rate (%)</label>
@@ -204,7 +245,17 @@
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">Expected Average Transaction Value (₹)</label>
-                <input type="number" class="form-control" placeholder="e.g., 4000">
+                <select class="form-control" id="avg-transaction">
+                  <option value="">Select amount</option>
+                  <option value="2000">₹2,000 (Budget)</option>
+                  <option value="3000">₹3,000 (Economy)</option>
+                  <option value="4000">₹4,000 (Standard)</option>
+                  <option value="5000">₹5,000 (Mid-range)</option>
+                  <option value="7500">₹7,500 (Premium)</option>
+                  <option value="10000">₹10,000 (Luxury)</option>
+                  <option value="custom">Custom amount</option>
+                </select>
+                <input type="number" class="form-control custom-input" id="custom-avg-transaction" placeholder="Enter custom amount" style="display: none; margin-top: 10px;">
               </div>
               <div class="form-group">
                 <label class="form-label">Expected Conversion Rate (%)</label>
