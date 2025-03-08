@@ -151,14 +151,12 @@ function loadCalculationFromFirestore(docId) {
         // Location info
         document.querySelector('input[placeholder="e.g., Jayanagar, Bangalore"]').value = data.locationName || '';
         setDropdownValue('store-size', 'custom-store-size', data.storeSize);
-        document.querySelector('input[placeholder="e.g., 5000"]').value = data.squareFootCost || '';
-        document.querySelector('input[placeholder="e.g., 100"]').value = data.monthlyRent || '';
+        setDropdownValue('monthly-rent', 'custom-monthly-rent', data.monthlyRent);
         
         // Initial investment
-        document.querySelector('input[placeholder="e.g., 1000000"]').value = data.interiorCost || '';
+        setDropdownValue('interior-cost', 'custom-interior-cost', data.interiorCost);
         document.querySelector('input[placeholder="e.g., 300000"]').value = data.securityDeposit || '';
-        document.querySelector('input[placeholder="e.g., 500000"]').value = data.fixturesEquipment || '';
-        document.querySelector('input[placeholder="e.g., 5000000"]').value = data.initialStock || '';
+        setDropdownValue('initial-stock', 'custom-initial-stock', data.initialStock);
         document.querySelector('input[placeholder="e.g., 200000"]').value = data.otherOneTime || '';
         
         // Monthly operational
@@ -411,6 +409,9 @@ function setupDropdowns() {
   // List of dropdowns with custom options
   const dropdowns = [
     { select: 'store-size', custom: 'custom-store-size' },
+    { select: 'monthly-rent', custom: 'custom-monthly-rent' },
+    { select: 'interior-cost', custom: 'custom-interior-cost' },
+    { select: 'initial-stock', custom: 'custom-initial-stock' },
     { select: 'num-employees', custom: 'custom-employees' },
     { select: 'conversion-rate', custom: 'custom-conversion-rate' },
     { select: 'profit-margin', custom: 'custom-profit-margin' },
@@ -461,14 +462,12 @@ function setupForm() {
       const formData = {
         locationName: document.querySelector('input[placeholder="e.g., Jayanagar, Bangalore"]').value,
         storeSize: getDropdownValue('store-size', 'custom-store-size'),
-        squareFootCost: parseFloat(document.querySelector('input[placeholder="e.g., 5000"]').value) || 0,
-        monthlyRent: parseFloat(document.querySelector('input[placeholder="e.g., 100"]').value) || 0,
+        monthlyRent: getDropdownValue('monthly-rent', 'custom-monthly-rent'),
         
         // Initial Investment
-        interiorCost: parseFloat(document.querySelector('input[placeholder="e.g., 1000000"]').value) || 0,
+        interiorCost: getDropdownValue('interior-cost', 'custom-interior-cost'),
         securityDeposit: parseFloat(document.querySelector('input[placeholder="e.g., 300000"]').value) || 0,
-        fixturesEquipment: parseFloat(document.querySelector('input[placeholder="e.g., 500000"]').value) || 0,
-        initialStock: parseFloat(document.querySelector('input[placeholder="e.g., 5000000"]').value) || 0,
+        initialStock: getDropdownValue('initial-stock', 'custom-initial-stock'),
         otherOneTime: parseFloat(document.querySelector('input[placeholder="e.g., 200000"]').value) || 0,
         
         // Monthly Operational
@@ -581,10 +580,8 @@ function switchToTab(tabName) {
 function calculateROI(data) {
   // Calculate total initial investment
   const initialInvestment = 
-    (data.squareFootCost * data.storeSize) +
     data.interiorCost +
     data.securityDeposit +
-    data.fixturesEquipment + 
     data.initialStock +
     data.otherOneTime;
   
@@ -769,14 +766,12 @@ function loadCalculation(index) {
     // Location info
     document.querySelector('input[placeholder="e.g., Jayanagar, Bangalore"]').value = data.locationName || '';
     setDropdownValue('store-size', 'custom-store-size', data.storeSize);
-    document.querySelector('input[placeholder="e.g., 5000"]').value = data.squareFootCost || '';
-    document.querySelector('input[placeholder="e.g., 100"]').value = data.monthlyRent || '';
+    setDropdownValue('monthly-rent', 'custom-monthly-rent', data.monthlyRent);
     
     // Initial investment
-    document.querySelector('input[placeholder="e.g., 1000000"]').value = data.interiorCost || '';
+    setDropdownValue('interior-cost', 'custom-interior-cost', data.interiorCost);
     document.querySelector('input[placeholder="e.g., 300000"]').value = data.securityDeposit || '';
-    document.querySelector('input[placeholder="e.g., 500000"]').value = data.fixturesEquipment || '';
-    document.querySelector('input[placeholder="e.g., 5000000"]').value = data.initialStock || '';
+    setDropdownValue('initial-stock', 'custom-initial-stock', data.initialStock);
     document.querySelector('input[placeholder="e.g., 200000"]').value = data.otherOneTime || '';
     
     // Monthly operational
