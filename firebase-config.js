@@ -10,8 +10,15 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+if (typeof firebase !== 'undefined') {
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
 
-// Initialize Firebase services
-const auth = firebase.auth();
-const db = firebase.firestore();
+  // Initialize Firebase services
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  
+  console.log('Firebase initialized successfully');
+} else {
+  console.error('Firebase SDK not found. Make sure you have included the Firebase scripts in your HTML.');
+}

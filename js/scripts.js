@@ -229,60 +229,88 @@ function setupAuth() {
   if (typeof firebase !== 'undefined' && firebase.auth) {
     const auth = firebase.auth();
     const authStatus = document.getElementById('auth-status');
+    const loginBtn = document.getElementById('login-btn');
+    const userInfo = document.getElementById('user-info');
+    const userEmail = document.getElementById('user-email');
+    const logoutBtn = document.getElementById('logout-btn');
+    const authModal = document.getElementById('auth-modal');
+    const closeBtn = document.querySelector('.auth-close');
     
     // Set up auth state change listener
     auth.onAuthStateChanged(user => {
-      if (authStatus) {
-        if (user) {
-          // User is signed in
-          authStatus.innerHTML = `
-            <span>Signed in as ${user.email}</span>
-            <button id="sign-out-btn" class="btn-small">Sign Out</button>
-          `;
-          
-          // Add sign out functionality
-          document.getElementById('sign-out-btn').addEventListener('click', () => {
-            auth.signOut();
-          });
-          
-          // Load user's calculations from Firestore
-          if (document.getElementById('saved-locations-container')) {
-            loadCalculationsFromFirestore();
-          }
-        } else {
-          // User is signed out
-          authStatus.innerHTML = `
-            <button id="sign-in-btn" class="btn-small">Sign In</button>
-          `;
-          
-          // Add sign in functionality
-          document.getElementById('sign-in-btn').addEventListener('click', () => {
-            const modal = document.getElementById('auth-modal');
-            if (modal) modal.style.display = 'block';
-          });
+      if (user) {
+        // User is signed in
+        if (authStatus) authStatus.style.display = 'none';
+        if (userInfo) {
+          userInfo.style.display = 'flex';
+          userEmail.textContent = user.email;
         }
+        
+        // Load user's calculations from Firestore if on saved tab
+        const savedTab = document.querySelector('.tab-button[data-tab="saved"]');
+        if (savedTab && savedTab.classList.contains('active')) {
+          loadCalculationsFromFirestore();
+        }
+      } else {
+        // User is signed out
+        if (authStatus) authStatus.style.display = 'block';
+        if (userInfo) userInfo.style.display = 'none';
       }
     });
     
-    // Setup auth modal close button
-    const modal = document.getElementById('auth-modal');
-    const closeBtn = document.querySelector('.auth-close');
-    if (modal && closeBtn) {
-      closeBtn.addEventListener('click', () => {
-        modal.style.display = 'none';
+    // Setup login button click handler
+    if (loginBtn) {
+      loginBtn.addEventListener('click', () => {
+        if (authModal) authModal.style.display = 'block';
       });
     }
     
-    // Setup sign in buttons
-    const emailSignInBtn = document.getElementById('email-signin-btn');
-    if (emailSignInBtn) {
-      emailSignInBtn.addEventListener('click', () => {
+    // Setup logout button click handler
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        auth.signOut().then(() => {
+          console.log('User signed out');
+        }).catch(error => {
+          console.error('Sign out error:', error);
+        });
+      });
+    }
+    
+    // Setup modal close button
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        if (authModal) authModal.style.display = 'none';
+      });
+    }
+    
+    // Close modal when clicking outside of it
+    window.addEventListener('click', (event) => {
+      if (event.target === authModal) {
+        authModal.style.display = 'none';
+      }
+    });
+    
+    // Setup sign in and sign up buttons
+    const signinBtn = document.getElementById('signin-btn');
+    const signupBtn = document.getElementById('signup-btn');
+    const googleSigninBtn = document.getElementById('google-signin-btn');
+    
+    if (signinBtn) {
+      signinBtn.addEventListener('click', () => {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         
+        if (!email || !password) {
+          alert('Please enter both email and password');
+          return;
+        }
+        
         auth.signInWithEmailAndPassword(email, password)
           .then(() => {
-            if (modal) modal.style.display = 'none';
+            authModal.style.display = 'none';
+            // Clear form fields
+            document.getElementById('email').value = '';
+            document.getElementById('password').value = '';
           })
           .catch(error => {
             alert(`Sign in error: ${error.message}`);
@@ -290,14 +318,35 @@ function setupAuth() {
       });
     }
     
-    // Google sign in
-    const googleSignInBtn = document.getElementById('google-signin-btn');
-    if (googleSignInBtn) {
-      googleSignInBtn.addEventListener('click', () => {
+    if (signupBtn) {
+      signupBtn.addEventListener('click', () => {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        
+        if (!email || !password) {
+          alert('Please enter both email and password');
+          return;
+        }
+        
+        auth.createUserWithEmailAndPassword(email, password)
+          .then(() => {
+            authModal.style.display = 'none';
+            // Clear form fields
+            document.getElementById('email').value = '';
+            document.getElementById('password').value = '';
+          })
+          .catch(error => {
+            alert(`Sign up error: ${error.message}`);
+          });
+      });
+    }
+    
+    if (googleSigninBtn) {
+      googleSigninBtn.addEventListener('click', () => {
         const provider = new firebase.auth.GoogleAuthProvider();
         auth.signInWithPopup(provider)
           .then(() => {
-            if (modal) modal.style.display = 'none';
+            authModal.style.display = 'none';
           })
           .catch(error => {
             alert(`Google sign in error: ${error.message}`);
