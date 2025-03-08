@@ -48,7 +48,16 @@
               </div>
               <div class="form-group">
                 <label class="form-label">Store Size (sq ft)</label>
-                <input type="number" class="form-control" placeholder="e.g., 1000">
+                <select class="form-control" id="store-size">
+                  <option value="">Select store size</option>
+                  <option value="500">Small (500 sq ft)</option>
+                  <option value="1000">Medium (1000 sq ft)</option>
+                  <option value="2000">Large (2000 sq ft)</option>
+                  <option value="3500">Extra Large (3500 sq ft)</option>
+                  <option value="5000">Superstore (5000+ sq ft)</option>
+                  <option value="custom">Custom size</option>
+                </select>
+                <input type="number" class="form-control custom-input" id="custom-store-size" placeholder="Enter custom size" style="display: none; margin-top: 10px;">
               </div>
             </div>
             
@@ -101,7 +110,20 @@
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">Number of Employees</label>
-                <input type="number" class="form-control" placeholder="e.g., 3">
+                <select class="form-control" id="num-employees">
+                  <option value="">Select number</option>
+                  <option value="1">1 employee</option>
+                  <option value="2">2 employees</option>
+                  <option value="3">3 employees</option>
+                  <option value="4">4 employees</option>
+                  <option value="5">5 employees</option>
+                  <option value="6">6-8 employees</option>
+                  <option value="10">9-12 employees</option>
+                  <option value="15">13-20 employees</option>
+                  <option value="25">20+ employees</option>
+                  <option value="custom">Custom number</option>
+                </select>
+                <input type="number" class="form-control custom-input" id="custom-employees" placeholder="Enter custom number" style="display: none; margin-top: 10px;">
               </div>
               <div class="form-group">
                 <label class="form-label">Average Salary per Employee (₹)</label>
@@ -141,7 +163,16 @@
               </div>
               <div class="form-group">
                 <label class="form-label">Annual Interest Rate (%)</label>
-                <input type="number" class="form-control" placeholder="e.g., 12">
+                <select class="form-control" id="interest-rate">
+                  <option value="">Select rate</option>
+                  <option value="8">8% (Excellent credit)</option>
+                  <option value="10">10% (Good credit)</option>
+                  <option value="12">12% (Average credit)</option>
+                  <option value="14">14% (Fair credit)</option>
+                  <option value="16">16% (Poor credit)</option>
+                  <option value="custom">Custom rate</option>
+                </select>
+                <input type="number" class="form-control custom-input" id="custom-interest-rate" placeholder="Enter custom rate" style="display: none; margin-top: 10px;">
               </div>
             </div>
           </div>
@@ -155,14 +186,34 @@
               </div>
               <div class="form-group">
                 <label class="form-label">Expected Conversion Rate (%)</label>
-                <input type="number" class="form-control" placeholder="e.g., 90">
+                <select class="form-control" id="conversion-rate">
+                  <option value="">Select rate</option>
+                  <option value="50">50% (1 in 2 visitors)</option>
+                  <option value="60">60% (3 in 5 visitors)</option>
+                  <option value="70">70% (7 in 10 visitors)</option>
+                  <option value="80">80% (4 in 5 visitors)</option>
+                  <option value="90">90% (9 in 10 visitors)</option>
+                  <option value="95">95% (19 in 20 visitors)</option>
+                  <option value="custom">Custom rate</option>
+                </select>
+                <input type="number" class="form-control custom-input" id="custom-conversion-rate" placeholder="Enter custom rate" style="display: none; margin-top: 10px;">
               </div>
             </div>
             
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">Expected Profit Margin (%)</label>
-                <input type="number" class="form-control" placeholder="e.g., 50">
+                <select class="form-control" id="profit-margin">
+                  <option value="">Select margin</option>
+                  <option value="20">20% (Low margin)</option>
+                  <option value="30">30% (Below average)</option>
+                  <option value="40">40% (Average)</option>
+                  <option value="50">50% (Above average)</option>
+                  <option value="60">60% (High margin)</option>
+                  <option value="70">70% (Premium)</option>
+                  <option value="custom">Custom margin</option>
+                </select>
+                <input type="number" class="form-control custom-input" id="custom-profit-margin" placeholder="Enter custom margin" style="display: none; margin-top: 10px;">
               </div>
             </div>
           </div>

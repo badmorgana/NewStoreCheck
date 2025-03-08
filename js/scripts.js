@@ -116,9 +116,41 @@ function loadCalculationFromFirestore(docId) {
         // Fill the form with saved data
         const data = calc.formData;
         
+        // Helper function to set dropdown or custom input value
+        function setDropdownValue(selectId, customId, value) {
+          const select = document.getElementById(selectId);
+          const customInput = document.getElementById(customId);
+          
+          if (!select || !customInput) return;
+          
+          // Check if the value matches any of the predefined options
+          let found = false;
+          for (let i = 0; i < select.options.length; i++) {
+            if (select.options[i].value && parseFloat(select.options[i].value) === value) {
+              select.selectedIndex = i;
+              found = true;
+              customInput.style.display = 'none';
+              break;
+            }
+          }
+          
+          // If not found, set to custom
+          if (!found && value) {
+            // Find the "custom" option
+            for (let i = 0; i < select.options.length; i++) {
+              if (select.options[i].value === 'custom') {
+                select.selectedIndex = i;
+                customInput.value = value;
+                customInput.style.display = 'block';
+                break;
+              }
+            }
+          }
+        }
+        
         // Location info
         document.querySelector('input[placeholder="e.g., Jayanagar, Bangalore"]').value = data.locationName || '';
-        document.querySelector('input[placeholder="e.g., 1000"]').value = data.storeSize || '';
+        setDropdownValue('store-size', 'custom-store-size', data.storeSize);
         document.querySelector('input[placeholder="e.g., 5000"]').value = data.squareFootCost || '';
         document.querySelector('input[placeholder="e.g., 100"]').value = data.monthlyRent || '';
         
@@ -130,7 +162,7 @@ function loadCalculationFromFirestore(docId) {
         document.querySelector('input[placeholder="e.g., 200000"]').value = data.otherOneTime || '';
         
         // Monthly operational
-        document.querySelector('input[placeholder="e.g., 3"]').value = data.numEmployees || '';
+        setDropdownValue('num-employees', 'custom-employees', data.numEmployees);
         document.querySelector('input[placeholder="e.g., 25000"]').value = data.avgSalary || '';
         document.querySelector('input[placeholder="e.g., 15000"]').value = data.utilities || '';
         document.querySelector('input[placeholder="e.g., 10000"]').value = data.maintenance || '';
@@ -139,12 +171,12 @@ function loadCalculationFromFirestore(docId) {
         
         // Financing
         document.querySelector('input[placeholder="e.g., 3000000"]').value = data.loanAmount || '';
-        document.querySelector('input[placeholder="e.g., 12"]').value = data.interestRate || '';
+        setDropdownValue('interest-rate', 'custom-interest-rate', data.interestRate);
         
         // Sales metrics
         document.querySelector('input[placeholder="e.g., 4000"]').value = data.avgTransaction || '';
-        document.querySelector('input[placeholder="e.g., 90"]').value = data.conversionRate || '';
-        document.querySelector('input[placeholder="e.g., 50"]').value = data.profitMargin || '';
+        setDropdownValue('conversion-rate', 'custom-conversion-rate', data.conversionRate);
+        setDropdownValue('profit-margin', 'custom-profit-margin', data.profitMargin);
         
         // Switch to input tab
         switchToTab('input');
@@ -364,6 +396,7 @@ document.addEventListener('DOMContentLoaded', function() {
   setupForm();
   setupTabs();
   setupLoadSavedButton();
+  setupDropdowns();
   
   // Only call setupAuth if Firebase is available
   if (typeof firebase !== 'undefined' && firebase.auth) {
@@ -373,6 +406,36 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
+// Setup dropdown fields with custom input options
+function setupDropdowns() {
+  // List of dropdowns with custom options
+  const dropdowns = [
+    { select: 'store-size', custom: 'custom-store-size' },
+    { select: 'num-employees', custom: 'custom-employees' },
+    { select: 'conversion-rate', custom: 'custom-conversion-rate' },
+    { select: 'profit-margin', custom: 'custom-profit-margin' },
+    { select: 'interest-rate', custom: 'custom-interest-rate' }
+  ];
+  
+  // Add event listeners to each dropdown
+  dropdowns.forEach(dropdown => {
+    const selectElement = document.getElementById(dropdown.select);
+    const customInput = document.getElementById(dropdown.custom);
+    
+    if (selectElement && customInput) {
+      selectElement.addEventListener('change', function() {
+        if (this.value === 'custom') {
+          customInput.style.display = 'block';
+          customInput.required = true;
+        } else {
+          customInput.style.display = 'none';
+          customInput.required = false;
+        }
+      });
+    }
+  });
+}
+
 // Form setup and calculation logic
 function setupForm() {
   const form = document.getElementById('roi-calculator-form');
@@ -381,10 +444,23 @@ function setupForm() {
     form.addEventListener('submit', function(e) {
       e.preventDefault();
       
+      // Helper function to get value from dropdown or custom input
+      function getDropdownValue(selectId, customId) {
+        const select = document.getElementById(selectId);
+        if (!select) return 0;
+        
+        if (select.value === 'custom') {
+          const customInput = document.getElementById(customId);
+          return parseFloat(customInput.value) || 0;
+        } else {
+          return parseFloat(select.value) || 0;
+        }
+      }
+      
       // Gather form data
       const formData = {
         locationName: document.querySelector('input[placeholder="e.g., Jayanagar, Bangalore"]').value,
-        storeSize: parseFloat(document.querySelector('input[placeholder="e.g., 1000"]').value) || 0,
+        storeSize: getDropdownValue('store-size', 'custom-store-size'),
         squareFootCost: parseFloat(document.querySelector('input[placeholder="e.g., 5000"]').value) || 0,
         monthlyRent: parseFloat(document.querySelector('input[placeholder="e.g., 100"]').value) || 0,
         
@@ -396,7 +472,7 @@ function setupForm() {
         otherOneTime: parseFloat(document.querySelector('input[placeholder="e.g., 200000"]').value) || 0,
         
         // Monthly Operational
-        numEmployees: parseFloat(document.querySelector('input[placeholder="e.g., 3"]').value) || 0,
+        numEmployees: getDropdownValue('num-employees', 'custom-employees'),
         avgSalary: parseFloat(document.querySelector('input[placeholder="e.g., 25000"]').value) || 0,
         utilities: parseFloat(document.querySelector('input[placeholder="e.g., 15000"]').value) || 0,
         maintenance: parseFloat(document.querySelector('input[placeholder="e.g., 10000"]').value) || 0,
@@ -405,12 +481,12 @@ function setupForm() {
         
         // Financing
         loanAmount: parseFloat(document.querySelector('input[placeholder="e.g., 3000000"]').value) || 0,
-        interestRate: parseFloat(document.querySelector('input[placeholder="e.g., 12"]').value) || 0,
+        interestRate: getDropdownValue('interest-rate', 'custom-interest-rate'),
         
         // Sales Metrics
         avgTransaction: parseFloat(document.querySelector('input[placeholder="e.g., 4000"]').value) || 0,
-        conversionRate: parseFloat(document.querySelector('input[placeholder="e.g., 90"]').value) || 0,
-        profitMargin: parseFloat(document.querySelector('input[placeholder="e.g., 50"]').value) || 0,
+        conversionRate: getDropdownValue('conversion-rate', 'custom-conversion-rate'),
+        profitMargin: getDropdownValue('profit-margin', 'custom-profit-margin'),
       };
       
       // Calculate ROI
@@ -658,9 +734,41 @@ function loadCalculation(index) {
     // Fill the form with saved data
     const data = calc.formData;
     
+    // Helper function to set dropdown or custom input value
+    function setDropdownValue(selectId, customId, value) {
+      const select = document.getElementById(selectId);
+      const customInput = document.getElementById(customId);
+      
+      if (!select || !customInput) return;
+      
+      // Check if the value matches any of the predefined options
+      let found = false;
+      for (let i = 0; i < select.options.length; i++) {
+        if (select.options[i].value && parseFloat(select.options[i].value) === value) {
+          select.selectedIndex = i;
+          found = true;
+          customInput.style.display = 'none';
+          break;
+        }
+      }
+      
+      // If not found, set to custom
+      if (!found && value) {
+        // Find the "custom" option
+        for (let i = 0; i < select.options.length; i++) {
+          if (select.options[i].value === 'custom') {
+            select.selectedIndex = i;
+            customInput.value = value;
+            customInput.style.display = 'block';
+            break;
+          }
+        }
+      }
+    }
+    
     // Location info
     document.querySelector('input[placeholder="e.g., Jayanagar, Bangalore"]').value = data.locationName || '';
-    document.querySelector('input[placeholder="e.g., 1000"]').value = data.storeSize || '';
+    setDropdownValue('store-size', 'custom-store-size', data.storeSize);
     document.querySelector('input[placeholder="e.g., 5000"]').value = data.squareFootCost || '';
     document.querySelector('input[placeholder="e.g., 100"]').value = data.monthlyRent || '';
     
@@ -672,7 +780,7 @@ function loadCalculation(index) {
     document.querySelector('input[placeholder="e.g., 200000"]').value = data.otherOneTime || '';
     
     // Monthly operational
-    document.querySelector('input[placeholder="e.g., 3"]').value = data.numEmployees || '';
+    setDropdownValue('num-employees', 'custom-employees', data.numEmployees);
     document.querySelector('input[placeholder="e.g., 25000"]').value = data.avgSalary || '';
     document.querySelector('input[placeholder="e.g., 15000"]').value = data.utilities || '';
     document.querySelector('input[placeholder="e.g., 10000"]').value = data.maintenance || '';
@@ -681,12 +789,12 @@ function loadCalculation(index) {
     
     // Financing
     document.querySelector('input[placeholder="e.g., 3000000"]').value = data.loanAmount || '';
-    document.querySelector('input[placeholder="e.g., 12"]').value = data.interestRate || '';
+    setDropdownValue('interest-rate', 'custom-interest-rate', data.interestRate);
     
     // Sales metrics
     document.querySelector('input[placeholder="e.g., 4000"]').value = data.avgTransaction || '';
-    document.querySelector('input[placeholder="e.g., 90"]').value = data.conversionRate || '';
-    document.querySelector('input[placeholder="e.g., 50"]').value = data.profitMargin || '';
+    setDropdownValue('conversion-rate', 'custom-conversion-rate', data.conversionRate);
+    setDropdownValue('profit-margin', 'custom-profit-margin', data.profitMargin);
     
     // Switch to input tab
     switchToTab('input');
